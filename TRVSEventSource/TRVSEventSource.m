@@ -58,7 +58,7 @@ typedef NS_ENUM(NSUInteger, TRVSEventSourceState) {
 @interface TRVSEventSource ()
 
 @property (nonatomic, strong, readwrite) NSOperationQueue *operationQueue;
-@property (nonatomic, strong, readwrite) NSURL *URL;
+@property (nonatomic, strong, readwrite) NSURLRequest *URLRequest;
 @property (nonatomic, strong, readwrite) NSURLSession *URLSession;
 @property (nonatomic, strong, readwrite) NSURLSessionTask *URLSessionTask;
 @property (nonatomic, readwrite) TRVSEventSourceState state;
@@ -72,20 +72,30 @@ typedef NS_ENUM(NSUInteger, TRVSEventSourceState) {
 #pragma mark - Public
 
 - (instancetype)initWithURL:(NSURL *)URL {
-  return [self initWithURL:URL
-      sessionConfiguration:NSURLSessionConfiguration
-                               .defaultSessionConfiguration];
+    return [self initWithURLRequest:[NSURLRequest requestWithURL:URL]];
+}
+
+- (instancetype)initWithURLRequest:(NSURLRequest *)URLRequest {
+  return [self initWithURLRequest:URLRequest
+             sessionConfiguration:NSURLSessionConfiguration
+                                      .defaultSessionConfiguration];
 }
 
 - (instancetype)initWithURL:(NSURL *)URL
        sessionConfiguration:(NSURLSessionConfiguration *)sessionConfiguration {
+    return [self initWithURLRequest:[NSURLRequest requestWithURL:URL]
+               sessionConfiguration:sessionConfiguration];
+}
+
+- (instancetype)initWithURLRequest:(NSURLRequest *)URLRequest
+              sessionConfiguration:(NSURLSessionConfiguration *)sessionConfiguration {
   if (!(self = [super init]))
     return nil;
 
   _operationQueue = [[NSOperationQueue alloc] init];
   _operationQueue.name = TRVSEventSourceOperationQueueName;
   _operationQueue.maxConcurrentOperationCount = 1;
-  _URL = URL;
+  _URLRequest = URLRequest;
   _listenersKeyedByEvent =
       [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsCopyIn
                                 valueOptions:NSPointerFunctionsStrongMemory
@@ -221,22 +231,28 @@ typedef NS_ENUM(NSUInteger, TRVSEventSourceState) {
 #pragma NSCoding
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
-  NSURL *URL = [aDecoder decodeObjectForKey:@"URL"];
+  NSURLRequest *URLRequest = [aDecoder decodeObjectForKey:@"URLRequest"];
 
-  if (!(self = [self initWithURL:URL]))
+  if (URLRequest == nil) {
+      NSURL *URL = [aDecoder decodeObjectForKey:@"URL"];
+      if (URL)
+          URLRequest = [NSURLRequest requestWithURL:URL];
+  }
+
+  if (!(self = [self initWithURLRequest:URLRequest]))
     return nil;
 
   return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)aCoder {
-  [aCoder encodeObject:self.URL forKey:@"URL"];
+  [aCoder encodeObject:self.URLRequest forKey:@"URLRequest"];
 }
 
 #pragma NSCopying
 
 - (id)copyWithZone:(NSZone *)zone {
-  return [[[self class] allocWithZone:zone] initWithURL:self.URL];
+  return [[[self class] allocWithZone:zone] initWithURLRequest:self.URLRequest];
 }
 
 #pragma mark - Private
@@ -274,7 +290,7 @@ typedef NS_ENUM(NSUInteger, TRVSEventSourceState) {
   [self.operationQueue addOperationWithBlock:^{
     [self.buffer setString:@""];
   }];
-  self.URLSessionTask = [self.URLSession dataTaskWithURL:self.URL];
+  self.URLSessionTask = [self.URLSession dataTaskWithRequest:self.URLRequest];
   [self.URLSessionTask resume];
 }
 

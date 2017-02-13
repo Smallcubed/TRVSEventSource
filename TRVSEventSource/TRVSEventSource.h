@@ -24,8 +24,8 @@ typedef void (^TRVSEventSourceEventHandler)(TRVSServerSentEvent *event, NSError 
  */
 @interface TRVSEventSource : NSObject <NSURLSessionDelegate, NSURLSessionDataDelegate, NSCopying, NSCoding>
 
-// The URL the event source receives events from.
-@property (nonatomic, strong, readonly) NSURL *URL;
+// The request for the URL the event source receives events from.
+@property (nonatomic, strong, readonly) NSURLRequest *URLRequest;
 // The managed session.
 @property (nonatomic, strong, readonly) NSURLSession *URLSession;
 // The task used to connect to the URL and receive event data.
@@ -54,6 +54,8 @@ typedef void (^TRVSEventSourceEventHandler)(TRVSServerSentEvent *event, NSError 
  */
 - (instancetype)initWithURL:(NSURL *)URL;
 
+- (instancetype)initWithURLRequest:(NSURLRequest *)URLRequest;
+
 /**
  *  Initializes an `TRVSEventSource` object with the specified URL and session configuration. The event source will open only by calling -[TRVSEventSource open].
  *
@@ -64,6 +66,8 @@ typedef void (^TRVSEventSourceEventHandler)(TRVSServerSentEvent *event, NSError 
  *  @return The newly-initialized event source.
  */
 - (instancetype)initWithURL:(NSURL *)URL sessionConfiguration:(NSURLSessionConfiguration *)sessionConfiguration;
+
+- (instancetype)initWithURLRequest:(NSURLRequest *)URLRequest sessionConfiguration:(NSURLSessionConfiguration *)sessionConfiguration;
 
 // @name opening and closing an event source
 
