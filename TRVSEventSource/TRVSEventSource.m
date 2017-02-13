@@ -228,6 +228,20 @@ typedef NS_ENUM(NSUInteger, TRVSEventSourceState) {
   }
 }
 
+- (void)URLSession:(NSURLSession *)session didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable))completionHandler {
+    if ([self.delegate respondsToSelector:@selector(eventSource:didReceiveChallenge:completionHandler:)])
+        [self.delegate eventSource:self didReceiveChallenge:challenge completionHandler:completionHandler];
+    else
+        completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, nil);
+}
+
+- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable))completionHandler {
+    if ([self.delegate respondsToSelector:@selector(eventSource:didReceiveChallenge:completionHandler:)])
+        [self.delegate eventSource:self didReceiveChallenge:challenge completionHandler:completionHandler];
+    else
+        completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, nil);
+}
+
 #pragma NSCoding
 
 - (id)initWithCoder:(NSCoder *)aDecoder {

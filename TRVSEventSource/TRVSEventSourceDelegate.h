@@ -11,6 +11,8 @@
 @class TRVSEventSource;
 @class TRVSServerSentEvent;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol TRVSEventSourceDelegate <NSObject>
 @optional
 
@@ -43,4 +45,17 @@
  *  @param error       The error associated with the failure.
  */
 - (void)eventSource:(TRVSEventSource *)eventSource didFailWithError:(NSError *)error;
+
+
+/**
+ *  Lets the delegate handle an authentication challenge.
+ *
+ *  @param eventSource The event source.
+ *  @param challenge   The authentication challenge provided by the URL session.
+ *  @param completion  A block to be called with a response to the challenge.
+ */
+- (void)eventSource:(TRVSEventSource *)eventSource didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential * _Nullable credential))completion;
+
 @end
+
+NS_ASSUME_NONNULL_END
