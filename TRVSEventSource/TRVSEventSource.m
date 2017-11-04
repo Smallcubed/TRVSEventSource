@@ -178,6 +178,12 @@ typedef NS_ENUM(NSUInteger, TRVSEventSourceState) {
     didReceiveData:(NSData *)data
 {
     NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    
+    if (string.length == 0)
+    {
+      return;
+    }
+    
     [self.buffer appendString:string];
     NSRange range = [self.buffer rangeOfString:@"\n\n"];
     
