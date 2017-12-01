@@ -181,6 +181,12 @@ typedef NS_ENUM(NSUInteger, TRVSEventSourceState) {
     
     if (string.length == 0)
     {
+        if ([self.delegate respondsToSelector:@selector(eventSource:wantsToLogMessage:)])
+        {
+            NSString *message = [NSString stringWithFormat:@"EVENT SOURCE CRASH AVOIDED: received an empty string from data %@ with length %@, from request %@",
+                                 data, @(data.length), dataTask.originalRequest];
+            [self.delegate eventSource:self wantsToLogMessage:message];
+        }
       return;
     }
     

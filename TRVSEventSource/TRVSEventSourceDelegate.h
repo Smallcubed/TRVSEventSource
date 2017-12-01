@@ -46,6 +46,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)eventSource:(TRVSEventSource *)eventSource didFailWithError:(NSError *)error;
 
+- (void)eventSource:(TRVSEventSource *)eventSource wantsToLogMessage:(NSString *)message;
+
 
 /**
  *  Lets the delegate handle an authentication challenge.
