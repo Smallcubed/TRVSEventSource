@@ -216,12 +216,27 @@ typedef NS_ENUM(NSUInteger, TRVSEventSourceState) {
 }
 
 - (void)URLSession:(NSURLSession *)session
-              dataTask:(NSURLSessionDataTask *)dataTask
-    didReceiveResponse:(NSURLResponse *)response
-     completionHandler:
-         (void (^)(NSURLSessionResponseDisposition))completionHandler {
-  completionHandler(NSURLSessionResponseAllow);
-  [self transitionToOpenIfNeeded];
+          dataTask:(NSURLSessionDataTask *)dataTask
+didReceiveResponse:(NSURLResponse *)response
+ completionHandler:(void (^)(NSURLSessionResponseDisposition))completionHandler {
+    if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+        NSHTTPURLResponse *httpResponse = (id)response;
+        NSInteger statusCode = httpResponse.statusCode;
+
+        if (statusCode < 200 || statusCode > 299) {
+            completionHandler(NSURLSessionResponseCancel);
+            NSError *error = [NSError
+                              errorWithDomain:NSStringFromClass([self class])
+                              code:1
+                              userInfo:@{
+                                  NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Connection failed with HTTP code %@", @(statusCode)],
+                              }];
+            [self transitionToFailedWithError:error];
+            return;
+        }
+    }
+    completionHandler(NSURLSessionResponseAllow);
+    [self transitionToOpenIfNeeded];
 }
 
 - (void)URLSession:(NSURLSession *)session
